@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   StyleSheet, View, Text, ImageBackground, Image, 
-  FlatList, TouchableOpacity, StatusBar, Dimensions 
+  FlatList, TouchableOpacity, StatusBar, Dimensions, TextInput 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -44,6 +44,33 @@ const glassDoctorData = [
 
 const GlassDoctorList = () => {
   const navigation = useNavigation();
+
+  // --- SEARCH STATES ---
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredData, setFilteredData] = useState(glassDoctorData);
+
+  // --- SEARCH LOGIC ---
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text.trim() === '') {
+      setFilteredData(glassDoctorData);
+    } else {
+      const filtered = glassDoctorData.filter((item) =>
+        item.name.toLowerCase().includes(text.toLowerCase()) ||
+        item.spec.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredData(filtered);
+    }
+  };
+
+  const toggleSearch = () => {
+    if (isSearching) {
+      setSearchQuery('');
+      setFilteredData(glassDoctorData);
+    }
+    setIsSearching(!isSearching);
+  };
 
   const renderDoctorCard = ({ item }) => (
     <View style={styles.glassCard}>
@@ -102,23 +129,39 @@ const GlassDoctorList = () => {
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <StatusBar barStyle="light-content" />
         
-        {/* HEADER */}
+        {/* HEADER WITH SEARCH TOGGLE */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={28} color="#FFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>All Doctors</Text>
-          <TouchableOpacity style={styles.backBtn}>
-            <Ionicons name="search" size={24} color="#FFF" />
+
+          {isSearching ? (
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search doctor..."
+              placeholderTextColor="rgba(255,255,255,0.6)"
+              autoFocus
+              value={searchQuery}
+              onChangeText={handleSearch}
+            />
+          ) : (
+            <Text style={styles.headerTitle}>All Doctors</Text>
+          )}
+
+          <TouchableOpacity onPress={toggleSearch} style={styles.backBtn}>
+            <Ionicons name={isSearching ? "close" : "search"} size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
 
         <FlatList
-          data={glassDoctorData}
+          data={filteredData}
           renderItem={renderDoctorCard}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listPadding}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No doctors found</Text>
+          }
         />
       </SafeAreaView>
     </ImageBackground>
@@ -136,8 +179,19 @@ const styles = StyleSheet.create({
     paddingVertical: 15 
   },
   headerTitle: { color: '#FFF', fontSize: 24, fontWeight: '600' },
+  searchBar: { 
+    flex: 1, 
+    height: 45, 
+    backgroundColor: 'rgba(255,255,255,0.2)', 
+    borderRadius: 15, 
+    paddingHorizontal: 15, 
+    color: '#fff',
+    marginHorizontal: 10,
+    fontSize: 16
+  },
   backBtn: { padding: 5 },
   listPadding: { paddingHorizontal: 20, paddingBottom: 40 },
+  emptyText: { color: '#fff', textAlign: 'center', marginTop: 50, opacity: 0.6 },
 
   glassCard: { 
     backgroundColor: 'rgba(255, 255, 255, 0.2)', 
