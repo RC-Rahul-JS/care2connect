@@ -1,17 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, View, Text, ImageBackground, Image, 
   ScrollView, TouchableOpacity, StatusBar, Dimensions 
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/Feather';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 
+// FIXED IMPORT
+import BannerCarousel from './BannerCarousel'; 
+
 const { width } = Dimensions.get('window');
 
-// --- SUB-COMPONENT FOR DOCTOR ITEMS ---
+// UPDATED DATA: Replaced Orders with History to match your request
+const services = [
+  { id: 1, title: 'Lab Test', icon: 'flask-outline', screen: 'LabTestScreen' },
+  { id: 2, title: 'Medicine', icon: 'medical-outline', screen: 'MedicineScreen' },
+  { id: 3, title: 'History', icon: 'time-outline', screen: 'AppointmentHistory' }, 
+  { id: 4, title: 'Consult', icon: 'videocam-outline', screen: 'ConsultScreen' },
+];
+
+const bannerData = [
+  { 
+    id: '1', 
+    title: 'Care2Connect', 
+    subTitle: 'Your Health, Our Priority', 
+    color: '#383981', 
+    isVideo: true, 
+    videoPath: require('../assets/videos/demo.mp4'), 
+    screen: 'GlassDoctorList' 
+  },
+  { 
+    id: '2', 
+    title: 'Full Body Checkup', 
+    subTitle: '80+ tests included', 
+    color: '#4A90E2', 
+    isVideo: false,
+    image: 'https://cdn-icons-png.flaticon.com/512/3063/3063176.png', 
+    screen: 'GlassDoctorList' 
+  },
+];
+
 const DoctorItem = ({ name, spec, exp, likes, imageUri, isNew, onBook, onView }) => (
     <View style={styles.programItem}>
         <TouchableOpacity onPress={onView} activeOpacity={0.8}>
@@ -46,6 +75,27 @@ const DoctorItem = ({ name, spec, exp, likes, imageUri, isNew, onBook, onView })
 const HomeScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   const headerHeight = (insets.top > 0 ? insets.top : 20) + 65;
 
   return (
@@ -60,47 +110,70 @@ const HomeScreen = () => {
         contentContainerStyle={[styles.scrollContent, { paddingTop: headerHeight + 15 }]} 
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. DOCTOR PROFILE HEADER */}
-        <View style={styles.doctorHeader}>
-          <Image source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} style={styles.avatar} />
+        <View style={styles.welcomeHeader}>
           <View>
-            <Text style={styles.doctorName}>Richard Brown</Text>
-            <View style={styles.tagRow}>
-              <View style={styles.glassTag}><Text style={styles.tagText}>Cardiologist</Text></View>
-              <View style={[styles.glassTag, { marginLeft: 8, flexDirection: 'row', alignItems: 'center' }]}>
-                <Text style={styles.tagText}>4.9 </Text>
-                <Icon name="star" size={10} color="#fff" fill="#fff" />
+            <Text style={styles.greetingText}>{getGreeting()},</Text>
+            <Text style={styles.welcomeText}>Welcome back!</Text>
+          </View>
+          <View style={styles.timeContainer}>
+            <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+          </View>
+        </View>
+
+        <View style={styles.gridContainer}>
+          {services.map((item) => (
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.gridItem}
+              onPress={() => item.screen && navigation.navigate(item.screen)}
+            >
+              <View style={styles.iconCircle}>
+                <Ionicons name={item.icon} size={26} color="#fff" />
               </View>
-            </View>
-          </View>
+              <Text style={styles.gridLabel} numberOfLines={1}>{item.title}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <Text style={styles.description}>
-          Richard is an invasive, non-interventional cardiologist. Specializes in the diagnosis and treatment of cardiovascular diseases... <Text style={styles.moreLink}>More</Text>
-        </Text>
+        <BannerCarousel 
+          data={bannerData} 
+          onBannerPress={(item) => navigation.navigate(item.screen)} 
+        />
 
-        {/* 2. STATS CARDS */}
-        <View style={styles.statsRow}>
-          <View style={styles.glassCardSmall}>
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardLabel}>17 August</Text>
-              <MaterialIcon name="toggle-switch" color="#5CF08C" size={32} />
-            </View>
-            <Text style={styles.cardMainTitle}>Sunday</Text>
-            <Text style={styles.cardTime}>10:30-11:30</Text>
-            <Text style={styles.cardFooterText}>Weekly visit</Text>
-          </View>
-
-          <View style={styles.glassCardSmall}>
-            <Text style={styles.cardLabel}>Semi-annual{"\n"}Recovery Dynamics</Text>
-            <Text style={styles.cardMainTitle}>Get better</Text>
-            <Text style={styles.cardPercent}>by +126%</Text>
-            <TouchableOpacity><Text style={styles.cardSeeMore}>See more</Text></TouchableOpacity>
-          </View>
-        </View>
-
-        {/* 3. RECENT & NEW DOCTORS (REPLACED HEALING PROGRAM) */}
+        {/* UPCOMING APPOINTMENT: Matches your original glass card style */}
         <View style={styles.glassCardLarge}>
+          <View style={styles.upcomingHeader}>
+            <Text style={styles.programTitle}>Upcoming Appointment</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('AppointmentHistory')}>
+                <Text style={styles.viewHistoryText}>View History</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.upcomingBookingCard}
+            onPress={() => navigation.navigate('AppointmentHistory')}
+          >
+            <View style={styles.doctorInfoRow}>
+                <Image source={{ uri: 'https://randomuser.me/api/portraits/men/15.jpg' }} style={styles.miniDocImg} />
+                <View style={{ marginLeft: 12 }}>
+                    <Text style={styles.itemTitle}>Dr. Anurag Tiwari</Text>
+                    <Text style={styles.itemSub}>Orthopedic Surgeon</Text>
+                </View>
+            </View>
+            <View style={styles.bookingDetailsRow}>
+                <View style={styles.chip}>
+                    <Ionicons name="calendar-outline" size={12} color="#fff" />
+                    <Text style={styles.chipText}> 10 April, 2026</Text>
+                </View>
+                <View style={styles.chip}>
+                    <Ionicons name="time-outline" size={12} color="#fff" />
+                    <Text style={styles.chipText}> 10:00 AM</Text>
+                </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.glassCardLarge, { marginTop: 20 }]}>
           <Text style={styles.programTitle}>Recent & New Doctors</Text>
           
           <DoctorItem 
@@ -133,11 +206,11 @@ const HomeScreen = () => {
           />
 
           <TouchableOpacity 
-  style={styles.fullProgramBtn}
-  onPress={() => navigation.navigate('GlassDoctorList')} // Changed from 'DoctorsList' to 'GlassDoctorList'
->
-  <Text style={styles.btnText}>View All Doctors</Text>
-</TouchableOpacity>
+            style={styles.fullProgramBtn}
+            onPress={() => navigation.navigate('GlassDoctorList')}
+          >
+            <Text style={styles.btnText}>View All Doctors</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </ImageBackground>
@@ -147,25 +220,28 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
-  doctorHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  avatar: { width: 90, height: 90, borderRadius: 25, marginRight: 15 },
-  doctorName: { color: '#fff', fontSize: 34, fontWeight: '400' },
-  tagRow: { flexDirection: 'row', marginTop: 4 },
-  glassTag: { backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 15, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
-  tagText: { color: '#fff', fontSize: 12 },
-  description: { color: 'rgba(255,255,255,0.9)', lineHeight: 22, marginBottom: 25, fontSize: 16 },
-  moreLink: { color: '#fff', fontWeight: 'bold', textDecorationLine: 'underline' },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
-  glassCardSmall: { width: '48%', backgroundColor: 'rgba(255, 255, 255, 0.3)', padding: 18, borderRadius: 30, borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.35)' },
-  cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardLabel: { color: 'rgba(255,255,255,0.8)', fontSize: 13 },
-  cardMainTitle: { color: '#fff', fontSize: 26, fontWeight: '500', marginTop: 15 },
-  cardTime: { color: '#fff', fontSize: 18, opacity: 0.9 },
-  cardPercent: { color: '#fff', fontSize: 20, fontWeight: '400' },
-  cardSeeMore: { color: '#fff', fontSize: 12, textDecorationLine: 'underline', marginTop: 10 },
-  cardFooterText: { color: 'rgba(255,255,255,0.6)', marginTop: 20, fontSize: 12 },
-  glassCardLarge: { backgroundColor: 'rgba(255, 255, 255, 0.25)', borderRadius: 40, padding: 20, borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.25)' },
-  programTitle: { color: '#fff', fontSize: 18, marginBottom: 25, fontWeight: '500' },
+  
+  welcomeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25, paddingHorizontal: 5 },
+  greetingText: { color: 'rgba(255,255,255,0.7)', fontSize: 16, fontWeight: '400' },
+  welcomeText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
+  timeContainer: { backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
+  timeText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+
+  gridContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
+  gridItem: { alignItems: 'center', width: (width - 60) / 4 },
+  iconCircle: { width: 60, height: 60, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
+  gridLabel: { color: '#fff', marginTop: 8, fontSize: 12, fontWeight: '500', textAlign: 'center' },
+
+  // Styles for Upcoming Section
+  upcomingHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+  viewHistoryText: { color: '#5CF08C', fontSize: 12, fontWeight: '600' },
+  upcomingBookingCard: { backgroundColor: 'rgba(255,255,255,0.1)', padding: 15, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  doctorInfoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  miniDocImg: { width: 45, height: 45, borderRadius: 12 },
+  bookingDetailsRow: { flexDirection: 'row', justifyContent: 'space-between' },
+
+  glassCardLarge: { backgroundColor: 'rgba(255, 255, 255, 0.25)', borderRadius: 40, padding: 20, borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.25)', marginTop: 10 },
+  programTitle: { color: '#fff', fontSize: 18, fontWeight: '500' },
   programItem: { flexDirection: 'row', marginBottom: 30, alignItems: 'center' },
   programImage: { width: 65, height: 65, borderRadius: 20, marginRight: 15 },
   itemTitle: { color: '#fff', fontSize: 18, fontWeight: '500' },
@@ -173,13 +249,10 @@ const styles = StyleSheet.create({
   chipRow: { flexDirection: 'row' },
   chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginRight: 8 },
   chipText: { color: '#fff', fontSize: 10 },
-  
-  // NEW UI ELEMENTS
   newBadge: { position: 'absolute', top: -5, left: -5, backgroundColor: '#5CF08C', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
   newBadgeText: { fontSize: 8, fontWeight: 'bold', color: '#1A1A1A' },
   miniBookBtn: { backgroundColor: 'rgba(255,255,255,0.3)', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 15, borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)' },
   miniBookText: { color: '#fff', fontSize: 12, fontWeight: '700' },
-
   fullProgramBtn: { backgroundColor: 'rgba(255,255,255,0.35)', paddingVertical: 20, borderRadius: 35, alignItems: 'center', marginTop: 5, borderWidth: 1, borderColor: '#fff' },
   btnText: { color: '#fff', fontSize: 18, fontWeight: '600' }
 });
