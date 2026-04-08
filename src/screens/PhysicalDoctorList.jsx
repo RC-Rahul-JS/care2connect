@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import ServiceQuickLinks from './ServiceQuickLinks'; // <--- Import here
+
 
 const { width } = Dimensions.get('window');
 

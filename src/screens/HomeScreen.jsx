@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, View, Text, ImageBackground, Image, 
-  ScrollView, TouchableOpacity, StatusBar, Dimensions 
+  ScrollView, TouchableOpacity, StatusBar, Dimensions, Alert
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -12,9 +12,9 @@ import BannerCarousel from './BannerCarousel';
 
 const { width } = Dimensions.get('window');
 
-// UPDATED DATA: Replaced Orders with History to match your request
+// UPDATED SERVICES: Changed Lab Test to Medicine History
 const services = [
-  { id: 1, title: 'Lab Test', icon: 'flask-outline', screen: 'LabTestScreen' },
+ { id: 1, title: 'Order History', icon: 'receipt-outline', screen: 'MedicationHistory' },
   { id: 2, title: 'Medicine', icon: 'medical-outline', screen: 'MedicineScreen' },
   { id: 3, title: 'History', icon: 'time-outline', screen: 'AppointmentHistory' }, 
   { id: 4, title: 'Consult', icon: 'videocam-outline', screen: 'ConsultScreen' },
@@ -96,6 +96,10 @@ const HomeScreen = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const handleDownloadPrescription = (orderId) => {
+    Alert.alert("Downloading", `Prescription for Order #${orderId} is being saved to your device.`);
+  };
+
   const headerHeight = (insets.top > 0 ? insets.top : 20) + 65;
 
   return (
@@ -140,37 +144,52 @@ const HomeScreen = () => {
           onBannerPress={(item) => navigation.navigate(item.screen)} 
         />
 
-        {/* UPCOMING APPOINTMENT: Matches your original glass card style */}
+        {/* REPLACED SECTION: MEDICATION ORDER HISTORY */}
         <View style={styles.glassCardLarge}>
           <View style={styles.upcomingHeader}>
-            <Text style={styles.programTitle}>Upcoming Appointment</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('AppointmentHistory')}>
-                <Text style={styles.viewHistoryText}>View History</Text>
+            <Text style={styles.programTitle}>Recent Medication Order</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('OrderTracking')}>
+                <Text style={styles.viewHistoryText}>View All</Text>
             </TouchableOpacity>
           </View>
           
-          <TouchableOpacity 
-            style={styles.upcomingBookingCard}
-            onPress={() => navigation.navigate('AppointmentHistory')}
-          >
+          <View style={styles.upcomingBookingCard}>
             <View style={styles.doctorInfoRow}>
-                <Image source={{ uri: 'https://randomuser.me/api/portraits/men/15.jpg' }} style={styles.miniDocImg} />
-                <View style={{ marginLeft: 12 }}>
-                    <Text style={styles.itemTitle}>Dr. Anurag Tiwari</Text>
-                    <Text style={styles.itemSub}>Orthopedic Surgeon</Text>
+                {/* Simulated Thumbnail of uploaded prescription */}
+                <View style={styles.prescriptionThumbContainer}>
+                  <Image 
+                    source={{ uri: 'https://i.pinimg.com/originals/93/29/7a/93297a78378512595e8653f538740510.jpg' }} 
+                    style={styles.prescriptionThumb} 
+                  />
+                  <TouchableOpacity 
+                    style={styles.downloadIconBadge}
+                    onPress={() => handleDownloadPrescription('ORD-882')}
+                  >
+                    <Ionicons name="download-outline" size={14} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+                <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text style={styles.itemTitle}>Order #ORD-882</Text>
+                    <Text style={styles.itemSub}>3 Medicines Packed</Text>
+                </View>
+                <View style={styles.statusBadge}>
+                   <Text style={styles.statusText}>READY</Text>
                 </View>
             </View>
             <View style={styles.bookingDetailsRow}>
                 <View style={styles.chip}>
                     <Ionicons name="calendar-outline" size={12} color="#fff" />
-                    <Text style={styles.chipText}> 10 April, 2026</Text>
+                    <Text style={styles.chipText}> Ordered: 07 April</Text>
                 </View>
-                <View style={styles.chip}>
-                    <Ionicons name="time-outline" size={12} color="#fff" />
-                    <Text style={styles.chipText}> 10:00 AM</Text>
-                </View>
+                <TouchableOpacity 
+                  style={styles.downloadFullBtn}
+                  onPress={() => handleDownloadPrescription('ORD-882')}
+                >
+                  <Ionicons name="cloud-download" size={16} color="#5CF08C" />
+                  <Text style={[styles.chipText, { color: '#5CF08C', marginLeft: 5 }]}>Prescription</Text>
+                </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
         </View>
 
         <View style={[styles.glassCardLarge, { marginTop: 20 }]}>
@@ -232,14 +251,20 @@ const styles = StyleSheet.create({
   iconCircle: { width: 60, height: 60, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
   gridLabel: { color: '#fff', marginTop: 8, fontSize: 12, fontWeight: '500', textAlign: 'center' },
 
-  // Styles for Upcoming Section
   upcomingHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
   viewHistoryText: { color: '#5CF08C', fontSize: 12, fontWeight: '600' },
   upcomingBookingCard: { backgroundColor: 'rgba(255,255,255,0.1)', padding: 15, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   doctorInfoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  miniDocImg: { width: 45, height: 45, borderRadius: 12 },
-  bookingDetailsRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  
+  // Prescription History Styles
+  prescriptionThumbContainer: { position: 'relative' },
+  prescriptionThumb: { width: 45, height: 45, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
+  downloadIconBadge: { position: 'absolute', bottom: -5, right: -5, backgroundColor: '#383981', borderRadius: 10, padding: 3, borderWidth: 1, borderColor: '#fff' },
+  statusBadge: { backgroundColor: 'rgba(92, 240, 140, 0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  statusText: { color: '#5CF08C', fontSize: 10, fontWeight: 'bold' },
+  downloadFullBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
 
+  bookingDetailsRow: { flexDirection: 'row', justifyContent: 'space-between' },
   glassCardLarge: { backgroundColor: 'rgba(255, 255, 255, 0.25)', borderRadius: 40, padding: 20, borderWidth: 1.5, borderColor: 'rgba(255, 255, 255, 0.25)', marginTop: 10 },
   programTitle: { color: '#fff', fontSize: 18, fontWeight: '500' },
   programItem: { flexDirection: 'row', marginBottom: 30, alignItems: 'center' },
