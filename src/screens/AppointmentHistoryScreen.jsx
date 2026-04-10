@@ -20,9 +20,8 @@ const AppointmentHistoryScreen = ({ navigation }) => {
       time: '10:00 AM - 11:00 AM',
       status: 'Upcoming',
       doctorPic: 'https://randomuser.me/api/portraits/men/15.jpg',
-      // In a real app, these details would come from your database
-      patientName: 'Rahul',
-      fatherName: 'Mr. Sharma',
+      patientName: 'Rahul Choudhary',
+      fatherName: 'Mr. S.P. Choudhary',
       gender: 'Male',
       dob: '15/08/1995'
     },
@@ -34,13 +33,21 @@ const AppointmentHistoryScreen = ({ navigation }) => {
       time: '02:00 PM - 03:00 PM',
       status: 'Completed',
       doctorPic: 'https://randomuser.me/api/portraits/women/12.jpg',
+      patientName: 'Rahul Choudhary',
+      fatherName: 'Mr. S.P. Choudhary',
+      gender: 'Male',
+      dob: '15/08/1995'
     }
   ];
 
   const filteredAppointments = appointments.filter(item => item.status === activeTab);
 
   const renderAppointmentCard = ({ item }) => (
-    <View style={styles.glassCard}>
+    <TouchableOpacity 
+      activeOpacity={0.9}
+      style={styles.glassCard}
+      onPress={() => navigation.navigate('AppointmentDetails', { appointmentData: item })}
+    >
       <View style={styles.cardHeader}>
         <Image source={{ uri: item.doctorPic }} style={styles.doctorImg} />
         <View style={styles.doctorInfo}>
@@ -66,25 +73,7 @@ const AppointmentHistoryScreen = ({ navigation }) => {
           <Text style={styles.footerText}>{item.time}</Text>
         </View>
       </View>
-      
-      {item.status === 'Upcoming' && (
-        <TouchableOpacity 
-          style={styles.actionBtn}
-          onPress={() => navigation.navigate('AppointmentBooking', {
-            isRescheduling: true,
-            doctorName: item.doctorName,
-            doctorPic: item.doctorPic,
-            doctorDegree: item.specialty,
-            existingPatientName: item.patientName,
-            existingFatherName: item.fatherName,
-            existingGender: item.gender,
-            existingDob: item.dob
-          })}
-        >
-          <Text style={styles.actionBtnText}>Reschedule</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -159,8 +148,6 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
   infoRow: { flexDirection: 'row', alignItems: 'center' },
   footerText: { color: '#FFF', fontSize: 12, marginLeft: 6 },
-  actionBtn: { backgroundColor: '#FFF', marginTop: 15, padding: 10, borderRadius: 12, alignItems: 'center' },
-  actionBtnText: { color: '#383981', fontWeight: '700', fontSize: 14 },
   emptyState: { alignItems: 'center', marginTop: 100 },
   emptyText: { color: 'rgba(255,255,255,0.5)', marginTop: 10, fontSize: 16 }
 });

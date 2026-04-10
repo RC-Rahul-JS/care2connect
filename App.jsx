@@ -27,7 +27,9 @@ import MedicineScreen from './src/screens/MedicineScreen';
 import OrderTrackingScreen from './src/screens/OrderTrackingScreen';
 // 1. Import the New Appointment History Screen
 import AppointmentHistoryScreen from './src/screens/AppointmentHistoryScreen'; 
-import MedicationHistoryScreen from './src/screens/MedicationHistoryScreen';
+import MedicationHistoryScreen from './src/screens/MedicationHistoryScreen'; 
+import MedicationDetailsScreen from './src/screens/MedicationDetailsScreen';
+import AppointmentDetailsScreen from './src/screens/AppointmentDetailsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -85,9 +87,10 @@ export default function App() {
           <Stack.Screen name="MedicineScreen" component={MedicineScreen} /> 
             <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
             <Stack.Screen name="MedicationHistory" component={MedicationHistoryScreen} />
-          
+          <Stack.Screen name="AppointmentDetails" component={AppointmentDetailsScreen} />
           {/* 2. Added AppointmentHistory to the Navigator */}
           <Stack.Screen name="AppointmentHistory" component={AppointmentHistoryScreen} />
+          <Stack.Screen name="MedicationDetails" component={MedicationDetailsScreen} />
           
         </Stack.Navigator>
       </NavigationContainer>
